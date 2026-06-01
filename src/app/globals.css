@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-primary: 270 43% 44%;
+    --brand-accent: 28 47% 64%;
+    --background: 0 0% 100%;
+    --foreground: 270 43% 15%;
+    --muted: 270 10% 96%;
+    --muted-foreground: 270 10% 45%;
+    --border: 270 10% 90%;
+    --ring: 270 43% 44%;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-white text-gray-900 antialiased;
+  }
+}
