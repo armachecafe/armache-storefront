@@ -3,12 +3,14 @@
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { User, MapPin, LogOut } from 'lucide-react';
+import { User, MapPin, LogOut, Package, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 
 const accountNavItems = [
   { href: '/cuenta/perfil', label: 'Mi Perfil', icon: User },
+  { href: '/cuenta/pedidos', label: 'Mis Pedidos', icon: Package },
   { href: '/cuenta/direcciones', label: 'Direcciones', icon: MapPin },
+  { href: '/cuenta/datos', label: 'Mis Datos', icon: Shield },
 ];
 
 export default function CuentaLayout({ children }: { children: React.ReactNode }) {
@@ -17,14 +19,16 @@ export default function CuentaLayout({ children }: { children: React.ReactNode }
   const pathname = usePathname();
 
   useEffect(() => {
-    // Don't redirect from the login/register page itself
-    if (!isLoading && !isAuthenticated && pathname !== '/cuenta') {
+    // Don't redirect from the login/register page or forgot-password page
+    const publicPaths = ['/cuenta', '/cuenta/', '/cuenta/recuperar', '/cuenta/recuperar/'];
+    if (!isLoading && !isAuthenticated && !publicPaths.includes(pathname)) {
       router.replace('/cuenta');
     }
   }, [isAuthenticated, isLoading, pathname, router]);
 
-  // The /cuenta page (login/register) renders without the account layout chrome
-  if (pathname === '/cuenta') {
+  // The /cuenta page (login/register) and /cuenta/recuperar render without the account layout chrome
+  const isPublicPage = pathname === '/cuenta' || pathname === '/cuenta/' || pathname.startsWith('/cuenta/recuperar');
+  if (isPublicPage) {
     return <>{children}</>;
   }
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useAuth, type AuthError } from '@/contexts/auth-context';
 import { confirmSignUp, resendConfirmationCode } from '@/lib/auth';
 
@@ -169,9 +170,9 @@ export function LoginForm({ onSuccess, onNeedConfirmation }: LoginFormProps) {
       </button>
 
       <p className="text-center text-sm text-gray-500">
-        <button type="button" className="text-brand-primary hover:underline" data-testid="login-forgot-password">
+        <Link href="/cuenta/recuperar" className="text-brand-primary hover:underline" data-testid="login-forgot-password">
           ¿Olvidaste tu contraseña?
-        </button>
+        </Link>
       </p>
     </form>
   );

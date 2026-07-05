@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingBag, User, Menu, LogOut, ChevronDown } from 'lucide-react';
+import { User, Menu, LogOut, ChevronDown } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
+import { MiniCart } from '@/components/cart/mini-cart';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -54,6 +55,9 @@ export function Header() {
           <Link href="/catalogo?category=derivados" className="text-gray-700 hover:text-brand-primary transition-colors">
             Derivados
           </Link>
+          <Link href="/empresas" className="text-gray-700 hover:text-brand-primary transition-colors">
+            Empresas
+          </Link>
         </nav>
 
         {/* Actions */}
@@ -95,6 +99,14 @@ export function Header() {
                   >
                     Direcciones
                   </Link>
+                  <Link
+                    href="/cuenta/pedidos"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    onClick={() => setAccountMenuOpen(false)}
+                    data-testid="header-dropdown-orders"
+                  >
+                    Mis Pedidos
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
@@ -112,9 +124,7 @@ export function Header() {
             </Link>
           )}
 
-          <button className="text-gray-700 hover:text-brand-primary relative" data-testid="header-cart-button">
-            <ShoppingBag className="w-5 h-5" />
-          </button>
+          <MiniCart />
           <button
             className="md:hidden text-gray-700"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -131,10 +141,12 @@ export function Header() {
           <Link href="/catalogo" className="block text-gray-700" onClick={() => setMobileMenuOpen(false)}>Catálogo</Link>
           <Link href="/catalogo?category=nuestro-cafe" className="block text-gray-700" onClick={() => setMobileMenuOpen(false)}>Nuestro Café</Link>
           <Link href="/catalogo?category=derivados" className="block text-gray-700" onClick={() => setMobileMenuOpen(false)}>Derivados</Link>
+          <Link href="/carrito" className="block text-gray-700" onClick={() => setMobileMenuOpen(false)}>Carrito</Link>
           {isAuthenticated && (
             <>
               <hr className="border-gray-100" />
               <Link href="/cuenta/perfil" className="block text-gray-700" onClick={() => setMobileMenuOpen(false)}>Mi Perfil</Link>
+              <Link href="/cuenta/pedidos" className="block text-gray-700" onClick={() => setMobileMenuOpen(false)}>Mis Pedidos</Link>
               <Link href="/cuenta/direcciones" className="block text-gray-700" onClick={() => setMobileMenuOpen(false)}>Direcciones</Link>
               <button onClick={handleLogout} className="block text-red-600 text-left">Cerrar Sesión</button>
             </>

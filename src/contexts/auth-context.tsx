@@ -3,12 +3,15 @@
 /**
  * Authentication Context — provides auth state and methods to all components.
  *
- * Wraps the Cognito auth library and exposes:
+ * Wraps the Amplify v6 auth library and exposes:
  * - user (attributes)
  * - isAuthenticated
  * - isLoading
  * - login, register, confirmCode, logout, refreshUser
+ * - changePassword, changeEmail, confirmEmailChange
  */
+
+import '@/lib/amplify-config'; // Configure Amplify before any auth call
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import {
@@ -18,6 +21,9 @@ import {
   confirmSignUp,
   getCurrentUser,
   getIdToken,
+  changePassword as authChangePassword,
+  changeEmail as authChangeEmail,
+  confirmEmailChange as authConfirmEmailChange,
   type SignUpParams,
   type CognitoUserAttributes,
   type AuthError,
@@ -33,9 +39,12 @@ interface AuthContextValue extends AuthState {
   login: (email: string, password: string) => Promise<void>;
   register: (params: SignUpParams) => Promise<{ userConfirmed: boolean }>;
   confirmCode: (email: string, code: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   getToken: () => Promise<string | null>;
+  changePassword: (oldPassword: string, newPassword: string) => Promise<void>;
+  changeEmail: (newEmail: string) => Promise<void>;
+  confirmEmailChange: (code: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -79,14 +88,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await confirmSignUp(email, code);
   }, []);
 
-  const logout = useCallback(() => {
-    signOut();
+  const logout = useCallback(async () => {
+    await signOut();
     setState({ user: null, isAuthenticated: false, isLoading: false });
   }, []);
 
   const getToken = useCallback(async () => {
     return getIdToken();
   }, []);
+
+  const handleChangePassword = useCallback(async (oldPassword: string, newPassword: string) => {
+    await authChangePassword(oldPassword, newPassword);
+  }, []);
+
+  const handleChangeEmail = useCallback(async (newEmail: string) => {
+    await authChangeEmail(newEmail);
+  }, []);
+
+  const handleConfirmEmailChange = useCallback(async (code: string) => {
+    await authConfirmEmailChange(code);
+    // Refresh user to pick up new email
+    await refreshUser();
+  }, [refreshUser]);
 
   return (
     <AuthContext.Provider
@@ -98,6 +121,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         refreshUser,
         getToken,
+        changePassword: handleChangePassword,
+        changeEmail: handleChangeEmail,
+        confirmEmailChange: handleConfirmEmailChange,
       }}
     >
       {children}

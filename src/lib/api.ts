@@ -11,7 +11,6 @@ async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: { 'Content-Type': 'application/json', ...options?.headers },
-    next: { revalidate: 60 }, // ISR: revalidate every 60s
   });
   if (!res.ok) {
     throw new Error(`API error: ${res.status} ${res.statusText}`);
@@ -155,6 +154,181 @@ export interface UpdateProfileInput {
   phoneNumber?: string;
 }
 
+// --- Cart Types ---
+
+export interface CartItem {
+  itemId: string;
+  sku: string;
+  name: string;
+  variantName?: string;
+  thumbnailUrl?: string;
+  priceCents: number;
+  quantity: number;
+  subtotalCents: number;
+}
+
+export interface Cart {
+  cartId: string;
+  items: CartItem[];
+  itemCount: number;
+  subtotalCents: number;
+}
+
+// --- Shipping Types ---
+
+export interface ShippingQuote {
+  method: string;
+  label: string;
+  costCents: number;
+  estimatedDays?: number;
+  pickupLocationId?: string;
+  pickupAddress?: string;
+}
+
+// --- Checkout Types ---
+
+export interface CheckoutSession {
+  sessionId: string;
+  status: string;
+  totalCents: number;
+  shippingCents: number;
+  items: CartItem[];
+}
+
+export interface PrepareCheckoutInput {
+  shippingAddress: {
+    recipientName: string;
+    street: string;
+    district?: string;
+    city: string;
+    department: string;
+    province: string;
+    postalCode?: string;
+    phoneNumber?: string;
+  };
+  contact: {
+    email: string;
+    name: string;
+    phoneNumber?: string;
+  };
+  shippingMethod: string;
+}
+
+// --- Payment Types ---
+
+export interface PaymentResult {
+  transactionId: string;
+  status: string;
+  gatewayRef?: string;
+}
+
+export interface InitiatePaymentInput {
+  checkoutSessionId: string;
+  orderRef: string;
+  amountCents: number;
+  currency: 'PEN';
+  customerEmail: string;
+  customerName?: string;
+  userId?: string;
+}
+
+// --- Order Types ---
+
+export type OrderStatus = 'CONFIRMED' | 'PREPARING' | 'DISPATCHED' | 'DELIVERED' | 'CANCELLED';
+
+export interface OrderSummary {
+  orderId: string;
+  orderCode: string;
+  status: OrderStatus;
+  totalCents: number;
+  itemCount: number;
+  createdAt: string;
+}
+
+export interface OrderItem {
+  sku: string;
+  name: string;
+  quantity: number;
+  priceCents: number;
+  subtotalCents: number;
+}
+
+export interface OrderTimeline {
+  status: string;
+  timestamp: string;
+  actor?: string;
+}
+
+export interface OrderDetail {
+  orderId: string;
+  orderCode: string;
+  status: OrderStatus;
+  totalCents: number;
+  shippingCents: number;
+  items: OrderItem[];
+  timeline: OrderTimeline[];
+  shippingAddress?: {
+    recipientName: string;
+    street: string;
+    city: string;
+    department: string;
+    province: string;
+  };
+  paymentMethod?: string;
+  trackingNumber?: string;
+  courierName?: string;
+  createdAt: string;
+}
+
+// --- Traceability Types ---
+
+export interface LotPublicProfile {
+  lotCode: string;
+  sku: string;
+  productName?: string;
+  variety?: string;
+  origin?: string;
+  altitude?: string;
+  roastDate: string;
+  expiryDate: string;
+  roastProfile?: string;
+  sensorNotes?: string;
+  processType: string;
+  producedBy?: string;
+  traceabilityUrl?: string;
+}
+
+/**
+ * Cart API call — supports both authenticated and guest carts.
+ * For guests, uses x-cart-id header from localStorage.
+ * For authenticated users, uses Bearer token (cart linked to userId).
+ */
+async function fetchCartApi<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = await getIdToken().catch(() => null);
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  } else {
+    const cartId = typeof window !== 'undefined' ? localStorage.getItem('armache_cart_id') : null;
+    if (cartId) {
+      headers['x-cart-id'] = cartId;
+    }
+  }
+
+  const res = await fetch(`${API_URL}${path}`, {
+    ...options,
+    headers: { ...headers, ...options?.headers },
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    throw new Error(`API error: ${res.status} ${res.statusText} ${body}`);
+  }
+  return res.json() as Promise<T>;
+}
+
 export const api = {
   // --- Public Storefront ---
   getTheme: () => fetchApi<Theme>('/storefront/theme').then((r) => (r as unknown as { theme: Theme }).theme),
@@ -168,6 +342,56 @@ export const api = {
     return fetchApi<{ items: ProductSummary[]; nextCursor?: string }>(`/storefront/products?${qs}`);
   },
   getProductBySlug: (slug: string) => fetchApi<{ product: ProductDetail; variants: ProductDetail['variants'] }>(`/storefront/products/${slug}`),
+
+  // --- Public Traceability ---
+  getLotProfile: (code: string) => fetchApi<LotPublicProfile>(`/traceability/lots/${encodeURIComponent(code)}`),
+
+  // --- Cart (auth or guest) ---
+  getCart: () => fetchCartApi<{ cart: Cart }>('/cart').then((r) => r.cart),
+  addCartItem: (sku: string, quantity: number) =>
+    fetchCartApi<{ cart: Cart }>('/cart/items', {
+      method: 'POST',
+      body: JSON.stringify({ sku, quantity }),
+    }).then((r) => r.cart),
+  updateCartItem: (itemId: string, quantity: number) =>
+    fetchCartApi<{ cart: Cart }>('/cart/items', {
+      method: 'PUT',
+      body: JSON.stringify({ itemId, quantity }),
+    }).then((r) => r.cart),
+  removeCartItem: (itemId: string) =>
+    fetchCartApi<{ cart: Cart }>('/cart/items', {
+      method: 'DELETE',
+      body: JSON.stringify({ itemId }),
+    }).then((r) => r.cart),
+  mergeCart: (guestCartId: string) =>
+    fetchAuthApi<{ cart: Cart }>('/cart/merge', {
+      method: 'POST',
+      body: JSON.stringify({ guestCartId }),
+    }).then((r) => r.cart),
+  calculateShipping: (department: string, province: string, district?: string) =>
+    fetchCartApi<{ quotes: ShippingQuote[] }>('/cart/shipping', {
+      method: 'POST',
+      body: JSON.stringify({ department, province, district }),
+    }).then((r) => r.quotes),
+
+  // --- Checkout (auth or guest with session) ---
+  prepareCheckout: (input: PrepareCheckoutInput) =>
+    fetchCartApi<{ session: CheckoutSession }>('/checkout/prepare', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }).then((r) => r.session),
+  finalizeCheckout: (sessionId: string, paymentReference: string) =>
+    fetchCartApi<{ status: string; orderId?: string; orderCode?: string }>('/checkout/finalize', {
+      method: 'POST',
+      body: JSON.stringify({ sessionId, paymentReference }),
+    }),
+
+  // --- Payment ---
+  initiatePayment: (input: InitiatePaymentInput) =>
+    fetchCartApi<PaymentResult>('/payments/initiate', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
 
   // --- Authenticated Account ---
   getProfile: () => fetchAuthApi<{ profile: UserProfile }>('/me/profile').then((r) => r.profile),
@@ -184,4 +408,18 @@ export const api = {
     }).then((r) => r.address),
   deleteAddress: (addressId: string) =>
     fetchAuthApi<void>(`/me/addresses/${addressId}`, { method: 'DELETE' }),
+
+  // --- Orders (authenticated) ---
+  getMyOrders: (pageSize = 20, cursor?: string) => {
+    const qs = new URLSearchParams({ pageSize: String(pageSize) });
+    if (cursor) qs.set('cursor', cursor);
+    return fetchAuthApi<{ items: OrderSummary[]; nextCursor?: string }>(`/me/orders?${qs}`);
+  },
+  getOrderById: (orderId: string) =>
+    fetchAuthApi<{ order: OrderDetail }>(`/me/orders/${orderId}`).then((r) => r.order),
+
+  // --- Data Rights (DATA-02) ---
+  exportMyData: () => fetchAuthApi<Record<string, unknown>>('/me/data-export'),
+  requestAccountDeletion: () =>
+    fetchAuthApi<{ requestId: string }>('/me/deletion-request', { method: 'POST' }),
 };

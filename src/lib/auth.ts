@@ -1,46 +1,60 @@
 /**
  * Cognito Authentication Library — Storefront (Customers Pool)
  *
- * Wraps amazon-cognito-identity-js for:
+ * Uses AWS Amplify Auth v6 (modular imports for tree-shaking).
+ *
+ * Provides:
  * - Sign up (with Ley 29733 consent)
  * - Confirm sign up (verification code)
- * - Sign in
- * - Sign out
+ * - Resend confirmation code
+ * - Sign in / Sign out
  * - Get current session / id token
  * - Get current authenticated user attributes
+ * - Forgot password / Reset password
+ * - Change password (authenticated)
+ * - Change email (with verification)
  */
 
 import {
-  CognitoUserPool,
-  CognitoUser,
-  AuthenticationDetails,
-  CognitoUserAttribute,
-  CognitoUserSession,
-  ISignUpResult,
-} from 'amazon-cognito-identity-js';
+  signIn as amplifySignIn,
+  signUp as amplifySignUp,
+  signOut as amplifySignOut,
+  confirmSignUp as amplifyConfirmSignUp,
+  resendSignUpCode,
+  resetPassword,
+  confirmResetPassword,
+  updatePassword,
+  fetchAuthSession,
+  fetchUserAttributes,
+  getCurrentUser as amplifyGetCurrentUser,
+  updateUserAttributes,
+  confirmUserAttribute,
+} from 'aws-amplify/auth';
 
-const USER_POOL_ID = process.env['NEXT_PUBLIC_COGNITO_USER_POOL_ID'] ?? 'us-east-1_jw3PdJZAN';
-const CLIENT_ID = process.env['NEXT_PUBLIC_COGNITO_CLIENT_ID'] ?? '';
+// --- Error Types ---
 
-const userPool = new CognitoUserPool({
-  UserPoolId: USER_POOL_ID,
-  ClientId: CLIENT_ID,
-});
+export type AuthErrorCode =
+  | 'UserNotConfirmedException'
+  | 'NotAuthorizedException'
+  | 'UsernameExistsException'
+  | 'CodeMismatchException'
+  | 'ExpiredCodeException'
+  | 'LimitExceededException'
+  | 'InvalidPasswordException'
+  | 'UserNotFoundException'
+  | 'AliasExistsException'
+  | 'InvalidParameterException'
+  | 'Unknown';
 
-export type AuthError =
-  | { code: 'UserNotConfirmedException'; message: string }
-  | { code: 'NotAuthorizedException'; message: string }
-  | { code: 'UsernameExistsException'; message: string }
-  | { code: 'CodeMismatchException'; message: string }
-  | { code: 'ExpiredCodeException'; message: string }
-  | { code: 'LimitExceededException'; message: string }
-  | { code: 'InvalidPasswordException'; message: string }
-  | { code: 'Unknown'; message: string };
+export interface AuthError {
+  code: AuthErrorCode;
+  message: string;
+}
 
 function toAuthError(err: unknown): AuthError {
-  if (err && typeof err === 'object' && 'code' in err) {
-    const e = err as { code: string; message?: string };
-    const knownCodes = [
+  if (err && typeof err === 'object' && 'name' in err) {
+    const e = err as { name: string; message?: string };
+    const knownCodes: AuthErrorCode[] = [
       'UserNotConfirmedException',
       'NotAuthorizedException',
       'UsernameExistsException',
@@ -48,14 +62,19 @@ function toAuthError(err: unknown): AuthError {
       'ExpiredCodeException',
       'LimitExceededException',
       'InvalidPasswordException',
-    ] as const;
+      'UserNotFoundException',
+      'AliasExistsException',
+      'InvalidParameterException',
+    ];
     for (const code of knownCodes) {
-      if (e.code === code) return { code, message: e.message ?? code };
+      if (e.name === code) return { code, message: e.message ?? code };
     }
   }
   const message = err instanceof Error ? err.message : 'Error desconocido';
   return { code: 'Unknown', message };
 }
+
+// --- Sign Up ---
 
 export interface SignUpParams {
   email: string;
@@ -70,89 +89,92 @@ export interface SignUpResult {
   userSub: string;
 }
 
-export function signUp(params: SignUpParams): Promise<SignUpResult> {
+export async function signUp(params: SignUpParams): Promise<SignUpResult> {
   const { email, password, givenName, familyName, phoneNumber } = params;
 
-  const attributes: CognitoUserAttribute[] = [
-    new CognitoUserAttribute({ Name: 'email', Value: email }),
-    new CognitoUserAttribute({ Name: 'given_name', Value: givenName }),
-    new CognitoUserAttribute({ Name: 'family_name', Value: familyName }),
-  ];
-
-  if (phoneNumber) {
-    attributes.push(new CognitoUserAttribute({ Name: 'phone_number', Value: phoneNumber }));
-  }
-
-  return new Promise((resolve, reject) => {
-    userPool.signUp(email, password, attributes, [], (err, result?: ISignUpResult) => {
-      if (err) return reject(toAuthError(err));
-      resolve({
-        userConfirmed: result?.userConfirmed ?? false,
-        userSub: result?.userSub ?? '',
-      });
+  try {
+    const result = await amplifySignUp({
+      username: email,
+      password,
+      options: {
+        userAttributes: {
+          email,
+          given_name: givenName,
+          family_name: familyName,
+          ...(phoneNumber ? { phone_number: phoneNumber } : {}),
+        },
+      },
     });
-  });
-}
 
-export function confirmSignUp(email: string, code: string): Promise<void> {
-  const cognitoUser = new CognitoUser({ Username: email, Pool: userPool });
-
-  return new Promise((resolve, reject) => {
-    cognitoUser.confirmRegistration(code, true, (err) => {
-      if (err) return reject(toAuthError(err));
-      resolve();
-    });
-  });
-}
-
-export function resendConfirmationCode(email: string): Promise<void> {
-  const cognitoUser = new CognitoUser({ Username: email, Pool: userPool });
-
-  return new Promise((resolve, reject) => {
-    cognitoUser.resendConfirmationCode((err) => {
-      if (err) return reject(toAuthError(err));
-      resolve();
-    });
-  });
-}
-
-export function signIn(email: string, password: string): Promise<CognitoUserSession> {
-  const cognitoUser = new CognitoUser({ Username: email, Pool: userPool });
-  const authDetails = new AuthenticationDetails({ Username: email, Password: password });
-
-  return new Promise((resolve, reject) => {
-    cognitoUser.authenticateUser(authDetails, {
-      onSuccess: (session) => resolve(session),
-      onFailure: (err) => reject(toAuthError(err)),
-    });
-  });
-}
-
-export function signOut(): void {
-  const currentUser = userPool.getCurrentUser();
-  if (currentUser) {
-    currentUser.signOut();
+    return {
+      userConfirmed: result.isSignUpComplete,
+      userSub: result.userId ?? '',
+    };
+  } catch (err) {
+    throw toAuthError(err);
   }
 }
 
-export function getSession(): Promise<CognitoUserSession | null> {
-  const currentUser = userPool.getCurrentUser();
-  if (!currentUser) return Promise.resolve(null);
+// --- Confirm Sign Up ---
 
-  return new Promise((resolve) => {
-    currentUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
-      if (err || !session || !session.isValid()) {
-        resolve(null);
-      } else {
-        resolve(session);
-      }
-    });
-  });
+export async function confirmSignUp(email: string, code: string): Promise<void> {
+  try {
+    await amplifyConfirmSignUp({ username: email, confirmationCode: code });
+  } catch (err) {
+    throw toAuthError(err);
+  }
 }
 
-export function getIdToken(): Promise<string | null> {
-  return getSession().then((session) => session?.getIdToken().getJwtToken() ?? null);
+// --- Resend Confirmation Code ---
+
+export async function resendConfirmationCode(email: string): Promise<void> {
+  try {
+    await resendSignUpCode({ username: email });
+  } catch (err) {
+    throw toAuthError(err);
+  }
 }
+
+// --- Sign In ---
+
+export async function signIn(email: string, password: string): Promise<void> {
+  try {
+    await amplifySignIn({ username: email, password });
+  } catch (err) {
+    throw toAuthError(err);
+  }
+}
+
+// --- Sign Out ---
+
+export async function signOut(): Promise<void> {
+  try {
+    await amplifySignOut();
+  } catch {
+    // Silently handle sign out errors — user is already logged out locally
+  }
+}
+
+// --- Session / Token ---
+
+export async function getSession(): Promise<{ idToken: string; accessToken: string } | null> {
+  try {
+    const session = await fetchAuthSession();
+    const idToken = session.tokens?.idToken?.toString();
+    const accessToken = session.tokens?.accessToken?.toString();
+    if (!idToken || !accessToken) return null;
+    return { idToken, accessToken };
+  } catch {
+    return null;
+  }
+}
+
+export async function getIdToken(): Promise<string | null> {
+  const session = await getSession();
+  return session?.idToken ?? null;
+}
+
+// --- Current User ---
 
 export interface CognitoUserAttributes {
   sub: string;
@@ -162,36 +184,87 @@ export interface CognitoUserAttributes {
   phoneNumber?: string;
 }
 
-export function getCurrentUser(): Promise<CognitoUserAttributes | null> {
-  const currentUser = userPool.getCurrentUser();
-  if (!currentUser) return Promise.resolve(null);
+export async function getCurrentUser(): Promise<CognitoUserAttributes | null> {
+  try {
+    // First check if there's an authenticated user
+    await amplifyGetCurrentUser();
 
-  return new Promise((resolve) => {
-    currentUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
-      if (err || !session || !session.isValid()) {
-        resolve(null);
-        return;
-      }
+    // Fetch user attributes
+    const attributes = await fetchUserAttributes();
 
-      currentUser.getUserAttributes((attrErr, attributes) => {
-        if (attrErr || !attributes) {
-          resolve(null);
-          return;
-        }
+    return {
+      sub: attributes.sub ?? '',
+      email: attributes.email ?? '',
+      givenName: attributes.given_name,
+      familyName: attributes.family_name,
+      phoneNumber: attributes.phone_number,
+    };
+  } catch {
+    return null;
+  }
+}
 
-        const attrMap: Record<string, string> = {};
-        for (const attr of attributes) {
-          attrMap[attr.getName()] = attr.getValue();
-        }
+// --- Forgot Password / Reset Password ---
 
-        resolve({
-          sub: attrMap['sub'] ?? '',
-          email: attrMap['email'] ?? '',
-          givenName: attrMap['given_name'],
-          familyName: attrMap['family_name'],
-          phoneNumber: attrMap['phone_number'],
-        });
-      });
+export interface ForgotPasswordResult {
+  codeDeliveryDetails: {
+    destination?: string;
+    medium?: string;
+  };
+}
+
+export async function forgotPassword(email: string): Promise<ForgotPasswordResult> {
+  try {
+    const result = await resetPassword({ username: email });
+    return {
+      codeDeliveryDetails: {
+        destination: result.nextStep.codeDeliveryDetails?.destination,
+        medium: result.nextStep.codeDeliveryDetails?.deliveryMedium,
+      },
+    };
+  } catch (err) {
+    throw toAuthError(err);
+  }
+}
+
+export async function confirmForgotPassword(
+  email: string,
+  code: string,
+  newPassword: string,
+): Promise<void> {
+  try {
+    await confirmResetPassword({ username: email, confirmationCode: code, newPassword });
+  } catch (err) {
+    throw toAuthError(err);
+  }
+}
+
+// --- Change Password (authenticated) ---
+
+export async function changePassword(oldPassword: string, newPassword: string): Promise<void> {
+  try {
+    await updatePassword({ oldPassword, newPassword });
+  } catch (err) {
+    throw toAuthError(err);
+  }
+}
+
+// --- Change Email (with verification) ---
+
+export async function changeEmail(newEmail: string): Promise<void> {
+  try {
+    await updateUserAttributes({
+      userAttributes: { email: newEmail },
     });
-  });
+  } catch (err) {
+    throw toAuthError(err);
+  }
+}
+
+export async function confirmEmailChange(code: string): Promise<void> {
+  try {
+    await confirmUserAttribute({ userAttributeKey: 'email', confirmationCode: code });
+  } catch (err) {
+    throw toAuthError(err);
+  }
 }

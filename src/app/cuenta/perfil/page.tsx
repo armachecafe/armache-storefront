@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { api, type UserProfile } from '@/lib/api';
 import { ProfileForm } from '@/components/account/profile-form';
+import { ChangePasswordForm } from '@/components/account/change-password-form';
+import { ChangeEmailForm } from '@/components/account/change-email-form';
 import { useAuth } from '@/contexts/auth-context';
 
 export default function PerfilPage() {
@@ -69,6 +71,26 @@ export default function PerfilPage() {
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
         <ProfileForm profile={profile} onUpdated={handleUpdated} />
+      </div>
+
+      {/* Change Email */}
+      <div className="mt-8 mb-6">
+        <h2 className="text-xl font-semibold text-gray-900">Cambiar Email</h2>
+        <p className="text-sm text-gray-500 mt-1">Actualiza tu dirección de email. Recibirás un código de verificación.</p>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <ChangeEmailForm />
+      </div>
+
+      {/* Change Password */}
+      <div className="mt-8 mb-6">
+        <h2 className="text-xl font-semibold text-gray-900">Cambiar Contraseña</h2>
+        <p className="text-sm text-gray-500 mt-1">Actualiza tu contraseña de acceso.</p>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <ChangePasswordForm />
       </div>
     </div>
   );
