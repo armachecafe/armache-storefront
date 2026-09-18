@@ -3,6 +3,7 @@
 import type { OrderStatus } from '@/lib/api';
 
 const STATUS_CONFIG: Record<OrderStatus, { label: string; className: string }> = {
+  CREATED: { label: 'Creado', className: 'bg-gray-100 text-gray-800' },
   CONFIRMED: { label: 'Confirmado', className: 'bg-blue-100 text-blue-800' },
   PREPARING: { label: 'En preparación', className: 'bg-yellow-100 text-yellow-800' },
   DISPATCHED: { label: 'Despachado', className: 'bg-orange-100 text-orange-800' },

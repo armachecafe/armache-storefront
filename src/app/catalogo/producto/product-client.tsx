@@ -103,7 +103,7 @@ export default function ProductPageClient() {
                 <div><span className="text-gray-500">Tostado:</span> <span className="font-medium">{product.coffeeAttributes.roastLevel}</span></div>
                 <div><span className="text-gray-500">Especie:</span> <span className="font-medium">{product.coffeeAttributes.species}</span></div>
               </div>
-              {product.coffeeAttributes.flavorNotes.length > 0 && (
+              {product.coffeeAttributes.flavorNotes && product.coffeeAttributes.flavorNotes.length > 0 && (
                 <div className="mt-3 pt-3 border-t border-brand-primary/10">
                   <span className="text-gray-500 text-sm">Notas de sabor: </span>
                   <span className="text-sm font-medium">{product.coffeeAttributes.flavorNotes.join(', ')}</span>
