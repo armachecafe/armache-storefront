@@ -17,12 +17,15 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
 }
 
 function ProductCard({ product }: { product: ProductSummary }) {
-  const price = (product.priceCents / 100).toFixed(2);
+  const price = ((product.priceCents ?? 0) / 100).toFixed(2);
   const comparePrice = product.compareAtPriceCents ? (product.compareAtPriceCents / 100).toFixed(2) : null;
 
   return (
+    // Static route + query param (?slug=): reliable in static export. A dynamic [slug]
+    // route can't be reconciled by the client router for non-prerendered slugs (falls back
+    // to '/' → HOME renders under the product URL). Link (soft-nav) is fine to a static route.
     <Link
-      href={`/catalogo/${product.slug}`}
+      href={`/catalogo/producto/?slug=${product.slug}`}
       className="group block bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow"
       data-testid={`product-card-${product.slug}`}
     >

@@ -1,7 +1,8 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { api, type Cart, type CartItem } from '@/lib/api';
+import { api, type Cart } from '@/lib/api';
+import { localCart, type LocalCartProductInfo } from '@/lib/local-cart';
 import { useAuth } from '@/contexts/auth-context';
 
 interface CartContextValue {
@@ -9,7 +10,12 @@ interface CartContextValue {
   itemCount: number;
   isLoading: boolean;
   error: string | null;
-  addItem: (sku: string, quantity?: number) => Promise<void>;
+  /**
+   * Add an item to the cart.
+   * - Guest mode: uses localStorage (requires product info for local persistence).
+   * - Authenticated: calls the API (only sku + quantity needed; product info optional).
+   */
+  addItem: (sku: string, quantity?: number, productInfo?: LocalCartProductInfo) => Promise<void>;
   updateItem: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   refreshCart: () => Promise<void>;
@@ -18,107 +24,140 @@ interface CartContextValue {
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 
-function getGuestCartId(): string {
-  if (typeof window === 'undefined') return '';
-  let cartId = localStorage.getItem('armache_cart_id');
-  if (!cartId) {
-    cartId = crypto.randomUUID();
-    localStorage.setItem('armache_cart_id', cartId);
-  }
-  return cartId;
-}
-
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<Cart | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const prevAuthRef = useRef(isAuthenticated);
 
+  // --- Load cart (local or API) ---
   const refreshCart = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await api.getCart();
-      setCart(data);
-    } catch (err) {
-      // If 404 or no cart, treat as empty
+
+      if (!isAuthenticated) {
+        // Guest mode: read from localStorage (no API calls)
+        setCart(localCart.get());
+      } else {
+        // Authenticated: fetch from API
+        const data = await api.getCart();
+        setCart(data);
+      }
+    } catch {
       setCart({ cartId: '', items: [], itemCount: 0, subtotalCents: 0 });
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
-  // Load cart on mount
+  // Load cart on mount and when auth state changes
   useEffect(() => {
-    // Ensure guest cartId exists
-    if (!isAuthenticated) {
-      getGuestCartId();
-    }
     refreshCart();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [refreshCart]);
 
-  // Merge guest cart on login
+  // --- Merge local cart on login ---
   useEffect(() => {
     if (isAuthenticated && !prevAuthRef.current) {
-      const guestCartId = typeof window !== 'undefined' ? localStorage.getItem('armache_cart_id') : null;
-      if (guestCartId) {
-        api.mergeCart(guestCartId)
-          .then((merged) => {
-            setCart(merged);
-            localStorage.removeItem('armache_cart_id');
-          })
-          .catch(() => {
-            // Merge failed — just refresh normally
-            refreshCart();
-          });
+      // User just logged in — merge local cart to server
+      if (localCart.hasItems()) {
+        const items = localCart.getItemsForMerge();
+        // Add each item to the server cart one by one (the existing API).
+        // This uses the authenticated addCartItem endpoint that validates stock/price.
+        (async () => {
+          try {
+            for (const item of items) {
+              await api.addCartItem(item.sku, item.quantity);
+            }
+            localCart.clear();
+            // Refresh to get the consolidated server cart
+            const serverCart = await api.getCart();
+            setCart(serverCart);
+          } catch {
+            // Merge partially failed — clear local anyway and refresh server cart
+            localCart.clear();
+            const serverCart = await api.getCart().catch(() => null);
+            if (serverCart) setCart(serverCart);
+          }
+        })();
       } else {
+        // No local items — just load server cart
         refreshCart();
       }
     }
     prevAuthRef.current = isAuthenticated;
   }, [isAuthenticated, refreshCart]);
 
-  const addItem = useCallback(async (sku: string, quantity = 1) => {
+  // --- Add item ---
+  const addItem = useCallback(async (sku: string, quantity = 1, productInfo?: LocalCartProductInfo) => {
     try {
       setError(null);
-      const updated = await api.addCartItem(sku, quantity);
-      setCart(updated);
-      // Store cartId for guests
-      if (!isAuthenticated && updated.cartId) {
-        localStorage.setItem('armache_cart_id', updated.cartId);
+
+      if (!isAuthenticated) {
+        // Guest: store locally (requires productInfo)
+        if (!productInfo) {
+          throw new Error('Product info is required for guest cart');
+        }
+        const updated = localCart.add(productInfo, quantity);
+        setCart(updated);
+      } else {
+        // Authenticated: call API
+        const updated = await api.addCartItem(sku, quantity);
+        setCart(updated);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al agregar al carrito');
+      const msg = err instanceof Error ? err.message : 'Error al agregar al carrito';
+      setError(msg);
       throw err;
     }
   }, [isAuthenticated]);
 
+  // --- Update item quantity ---
   const updateItem = useCallback(async (itemId: string, quantity: number) => {
     try {
       setError(null);
-      const updated = await api.updateCartItem(itemId, quantity);
-      setCart(updated);
+
+      if (!isAuthenticated) {
+        const updated = localCart.update(itemId, quantity);
+        setCart(updated);
+      } else {
+        const updated = await api.updateCartItem(itemId, quantity);
+        setCart(updated);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al actualizar item');
+      const msg = err instanceof Error ? err.message : 'Error al actualizar item';
+      setError(msg);
       throw err;
     }
-  }, []);
+  }, [isAuthenticated]);
 
+  // --- Remove item ---
   const removeItem = useCallback(async (itemId: string) => {
     try {
       setError(null);
-      const updated = await api.removeCartItem(itemId);
-      setCart(updated);
+
+      if (!isAuthenticated) {
+        const updated = localCart.remove(itemId);
+        setCart(updated);
+      } else {
+        const updated = await api.removeCartItem(itemId);
+        setCart(updated);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al eliminar item');
+      const msg = err instanceof Error ? err.message : 'Error al eliminar item';
+      setError(msg);
       throw err;
     }
-  }, []);
+  }, [isAuthenticated]);
 
+  // --- Clear cart ---
   const clearCart = useCallback(() => {
+    if (!isAuthenticated) {
+      localCart.clear();
+    }
     setCart({ cartId: '', items: [], itemCount: 0, subtotalCents: 0 });
-  }, []);
+  }, [isAuthenticated]);
 
   return (
     <CartContext.Provider

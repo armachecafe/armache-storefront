@@ -1,23 +1,33 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { api } from '@/lib/api';
 import type { ProductDetail } from '@/lib/api';
+import { useCart } from '@/contexts/cart-context';
 
 export default function ProductPageClient() {
-  const params = useParams<{ slug: string }>();
+  const searchParams = useSearchParams();
+  // slug comes from the query string (?slug=...), read at runtime — reliable in static export.
+  const slug = searchParams.get('slug') ?? '';
+  const { addItem } = useCart();
   const [product, setProduct] = useState<ProductDetail | null>(null);
   const [variants, setVariants] = useState<ProductDetail['variants']>([]);
   const [loading, setLoading] = useState(true);
+  const [adding, setAdding] = useState(false);
+  const [addedMessage, setAddedMessage] = useState('');
+  const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
-    if (!params.slug || params.slug === '_') return;
+    if (!slug) {
+      setLoading(false);
+      return;
+    }
 
     async function load() {
       try {
-        const data = await api.getProductBySlug(params.slug);
+        const data = await api.getProductBySlug(slug);
         setProduct(data.product);
         setVariants(data.variants);
       } catch {
@@ -27,15 +37,7 @@ export default function ProductPageClient() {
       }
     }
     load();
-  }, [params.slug]);
-
-  if (!params.slug || params.slug === '_') {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-        <p className="text-gray-500">Redirigiendo...</p>
-      </div>
-    );
-  }
+  }, [slug]);
 
   if (loading) {
     return (
@@ -69,7 +71,7 @@ export default function ProductPageClient() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         <div className="space-y-4">
-          {product.images && product.images.length > 0 ? (
+          {product.images && product.images.length > 0 && !imgError ? (
             <div className="aspect-square relative rounded-xl overflow-hidden bg-gray-50">
               <Image
                 src={product.images.find((i) => i.isPrimary)?.url ?? product.images[0].url}
@@ -78,10 +80,11 @@ export default function ProductPageClient() {
                 className="object-cover"
                 priority
                 data-testid="product-main-image"
+                onError={() => setImgError(true)}
               />
             </div>
           ) : (
-            <div className="aspect-square bg-gray-50 rounded-xl flex items-center justify-center text-6xl">☕</div>
+            <div className="aspect-square bg-gray-50 rounded-xl flex items-center justify-center text-6xl" data-testid="product-image-fallback">☕</div>
           )}
         </div>
 
@@ -130,10 +133,31 @@ export default function ProductPageClient() {
           )}
 
           <button
-            className="w-full bg-brand-primary text-white py-3 rounded-lg font-semibold hover:bg-brand-secondary transition-colors"
+            onClick={async () => {
+              if (!product || !defaultVariant) return;
+              setAdding(true);
+              setAddedMessage('');
+              try {
+                await addItem(defaultVariant.sku, 1, {
+                  sku: defaultVariant.sku,
+                  name: product.name,
+                  variantName: defaultVariant.name,
+                  thumbnailUrl: product.images?.[0]?.url,
+                  priceCents: defaultVariant.priceCents,
+                });
+                setAddedMessage('¡Agregado al carrito!');
+                setTimeout(() => setAddedMessage(''), 2500);
+              } catch {
+                // error handled by cart context
+              } finally {
+                setAdding(false);
+              }
+            }}
+            disabled={adding}
+            className="w-full bg-brand-primary text-white py-3 rounded-lg font-semibold hover:bg-brand-secondary transition-colors disabled:opacity-50"
             data-testid="add-to-cart-button"
           >
-            Agregar al Carrito
+            {adding ? 'Agregando...' : addedMessage || 'Agregar al Carrito'}
           </button>
 
           <div className="mt-8 prose prose-sm max-w-none" data-testid="product-description">

@@ -18,7 +18,7 @@ export function OrderCard({ order }: OrderCardProps) {
 
   return (
     <Link
-      href={`/cuenta/pedidos/${order.orderId}`}
+      href={`/cuenta/pedidos/detalle/?id=${order.orderId}`}
       className="block border border-gray-200 rounded-lg p-4 hover:border-brand-primary/40 hover:shadow-sm transition-all"
       data-testid={`order-card-${order.orderId}`}
     >

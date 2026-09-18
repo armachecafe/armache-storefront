@@ -45,6 +45,16 @@ async function fetchAuthApi<T>(path: string, options?: RequestInit): Promise<T> 
   return res.json() as Promise<T>;
 }
 
+export interface ProductImage {
+  imageId: string;
+  url: string;
+  thumbnailUrl: string;
+  mediumUrl: string;
+  altText: string;
+  sortOrder: number;
+  isPrimary: boolean;
+}
+
 export interface ProductSummary {
   productId: string;
   slug: string;
@@ -68,8 +78,8 @@ export interface ProductDetail {
   slug: string;
   name: string;
   description: string;
-  images: { url: string; thumbnailUrl: string; mediumUrl: string; isPrimary: boolean }[];
-  variants: { variantId: string; name: string; priceCents: number; compareAtPriceCents?: number; inStock: boolean }[];
+  images: ProductImage[];
+  variants: { variantId: string; sku: string; name: string; priceCents: number; compareAtPriceCents?: number; inStock: boolean }[];
   coffeeAttributes?: {
     species: string;
     origin: string;
@@ -341,7 +351,20 @@ export const api = {
     if (params?.cursor) qs.set('cursor', params.cursor);
     return fetchApi<{ items: ProductSummary[]; nextCursor?: string }>(`/storefront/products?${qs}`);
   },
-  getProductBySlug: (slug: string) => fetchApi<{ product: ProductDetail; variants: ProductDetail['variants'] }>(`/storefront/products/${slug}`),
+  getProductBySlug: (slug: string) =>
+    fetchApi<{
+      product: Omit<ProductDetail, 'images'> & { images?: ProductImage[] };
+      variants: ProductDetail['variants'];
+      images?: ProductImage[];
+    }>(`/storefront/products/${encodeURIComponent(slug)}`).then((response) => ({
+      product: {
+        ...response.product,
+        images: [...(response.product.images ?? response.images ?? [])].sort(
+          (left, right) => left.sortOrder - right.sortOrder || left.imageId.localeCompare(right.imageId),
+        ),
+      },
+      variants: response.variants,
+    })),
 
   // --- Public Traceability ---
   getLotProfile: (code: string) => fetchApi<LotPublicProfile>(`/traceability/lots/${encodeURIComponent(code)}`),

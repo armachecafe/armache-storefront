@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/auth-context';
@@ -11,7 +11,9 @@ import { OrderDetail } from '@/components/orders/order-detail';
 export default function OrderDetailPageClient() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  const params = useParams<{ orderId: string }>();
+  const searchParams = useSearchParams();
+  // orderId comes from the query string (?id=...), read at runtime — reliable in static export.
+  const orderId = searchParams.get('id') ?? '';
   const [order, setOrder] = useState<OrderDetailType | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -25,13 +27,13 @@ export default function OrderDetailPageClient() {
 
   // Fetch order
   useEffect(() => {
-    if (!isAuthenticated || !params.orderId || params.orderId === '_') return;
+    if (!isAuthenticated || !orderId) return;
     setLoading(true);
-    api.getOrderById(params.orderId)
+    api.getOrderById(orderId)
       .then((data) => setOrder(data))
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
-  }, [isAuthenticated, params.orderId]);
+  }, [isAuthenticated, orderId]);
 
   if (authLoading || (!isAuthenticated && !authLoading)) {
     return null;

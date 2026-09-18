@@ -43,7 +43,7 @@ function PedidoConfirmadoContent() {
       <div className="space-y-3">
         {isAuthenticated && orderId && (
           <Link
-            href={`/cuenta/pedidos/${orderId}`}
+            href={`/cuenta/pedidos/detalle/?id=${orderId}`}
             className="block w-full py-3 px-4 bg-brand-primary text-white font-medium rounded-lg hover:bg-brand-primary/90 transition-colors"
             data-testid="confirmation-view-order"
           >
