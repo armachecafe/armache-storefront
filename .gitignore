@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js
+.next/
+out/
+
+# Testing
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Misc
+.DS_Store
+*.pem
+.env*.local

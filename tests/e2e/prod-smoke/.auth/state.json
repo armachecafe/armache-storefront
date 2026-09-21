@@ -1,0 +1,34 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "https://armachecafe.com",
+      "localStorage": [
+        {
+          "name": "CognitoIdentityServiceProvider.780qhrdegeu08g7nlb81bqpuvv.64d8a418-30d1-7034-2372-8916a3cb4a4b.accessToken",
+          "value": "eyJraWQiOiIram44dnN5OGVKaVZMemtmNURCNUxDcEZ5WVJzVWx3RFdlbGNOQ1UzZFh3PSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI2NGQ4YTQxOC0zMGQxLTcwMzQtMjM3Mi04OTE2YTNjYjRhNGIiLCJpc3MiOiJodHRwczovL2NvZ25pdG8taWRwLnVzLWVhc3QtMS5hbWF6b25hd3MuY29tL3VzLWVhc3QtMV9qdzNQZEpaQU4iLCJjbGllbnRfaWQiOiI3ODBxaHJkZWdldTA4ZzdubGI4MWJxcHV2diIsIm9yaWdpbl9qdGkiOiJhYzFmNzBjOC0zOWU5LTQ5MDYtODhkNS1lYzEwNWIyNWI0ZjIiLCJldmVudF9pZCI6IjQyMGE4OTE4LTU2ZjItNDk0Ni1iN2I1LTRmOTRiMGQwZDFjNyIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE3ODQzNDU3NjIsImV4cCI6MTc4NDM0OTM2MiwiaWF0IjoxNzg0MzQ1NzYyLCJqdGkiOiI1OTExY2I2Ni04YjAwLTRjZjAtOWJhNC05NDJkYzA1MjNmYTciLCJ1c2VybmFtZSI6IjY0ZDhhNDE4LTMwZDEtNzAzNC0yMzcyLTg5MTZhM2NiNGE0YiJ9.eg7IUYSxOa4VCxijGrINemf_IoMpLExB2F8aqCfwbz-2uyeaB2ywJbyNBbsgSX0iFkE-VDfIGeeNK9uOqJMC_YdvKJLugAP6XFuDkArQVU6mPr59kJRnepnLsJ8QlQnPGodVvFKVxHFfxfIV_pfzywx8FFBNMFndd-EpN-S0hOIeef6MAUGBp6zEV9RriT2EsBQskFuqGWnchBdUV21KcmYbHPqruWT5TgOTV9jNTmp9mk6sVCY9YWiRQ_JYLUbUgWiHrSJcoBJVUKH-0m1q-Tbqttdjk9L31iFOgNYDeBdbsOUHbaBDtrVecvxGCS459oa-9Rt4lzIwcO8CK8YdQA"
+        },
+        {
+          "name": "CognitoIdentityServiceProvider.780qhrdegeu08g7nlb81bqpuvv.LastAuthUser",
+          "value": "64d8a418-30d1-7034-2372-8916a3cb4a4b"
+        },
+        {
+          "name": "CognitoIdentityServiceProvider.780qhrdegeu08g7nlb81bqpuvv.64d8a418-30d1-7034-2372-8916a3cb4a4b.signInDetails",
+          "value": "{\"loginId\":\"test-ee09cf17-26cb-4e91-9af9-f0c800808d43@armachecafe.com\",\"authFlowType\":\"USER_SRP_AUTH\"}"
+        },
+        {
+          "name": "CognitoIdentityServiceProvider.780qhrdegeu08g7nlb81bqpuvv.64d8a418-30d1-7034-2372-8916a3cb4a4b.idToken",
+          "value": "eyJraWQiOiJsVUY4MFp3bjM0YU1oeGRJM2ZVaXB1bndKUXNjdE9pQWR5c3R2b1RjeVlRPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI2NGQ4YTQxOC0zMGQxLTcwMzQtMjM3Mi04OTE2YTNjYjRhNGIiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiaXNzIjoiaHR0cHM6Ly9jb2duaXRvLWlkcC51cy1lYXN0LTEuYW1hem9uYXdzLmNvbS91cy1lYXN0LTFfanczUGRKWkFOIiwiY29nbml0bzp1c2VybmFtZSI6IjY0ZDhhNDE4LTMwZDEtNzAzNC0yMzcyLTg5MTZhM2NiNGE0YiIsImdpdmVuX25hbWUiOiJUZXN0Iiwib3JpZ2luX2p0aSI6ImFjMWY3MGM4LTM5ZTktNDkwNi04OGQ1LWVjMTA1YjI1YjRmMiIsImF1ZCI6Ijc4MHFocmRlZ2V1MDhnN25sYjgxYnFwdXZ2IiwiZXZlbnRfaWQiOiI0MjBhODkxOC01NmYyLTQ5NDYtYjdiNS00Zjk0YjBkMGQxYzciLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTc4NDM0NTc2MiwiZXhwIjoxNzg0MzQ5MzYyLCJpYXQiOjE3ODQzNDU3NjIsImZhbWlseV9uYW1lIjoiQ3VzdG9tZXIiLCJqdGkiOiIwZmJiZWZmZC01YWVlLTQwZmItYjNlMS03ZTY5MDhkY2JhYjMiLCJlbWFpbCI6InRlc3QtZWUwOWNmMTctMjZjYi00ZTkxLTlhZjktZjBjODAwODA4ZDQzQGFybWFjaGVjYWZlLmNvbSJ9.ACvOSPb6jEViPzEjLBBqGGkRmpzv61U94Vu0ohNUYfSr4SM7c7ZUOvvB9Mf5aOFrAH01CH-eYjY7Lj3x0LvzxIvgfmB5ffobSGo28riGUGz4w3npU82wPphuRbSSCR_dxK-9UHWY6yvJCnxMWTZ71bTXvpkaImzPclggbrIiJ8bQ0lpOc9riBmhp5D6PNcxrAkiBLtCh2HVEmts-pne9kfyTuF3c9ZPKcwO3pY8AosXowcEWwrDpeYoMElF7E0rgSTeYqXgl_YMp6qfcHiA1bB5ebxzfusyC_KJOX_4jPiV1cE9pukbay48Ccfhb64Hkonl-uyoQrm6Ld-BMFodBiQ"
+        },
+        {
+          "name": "CognitoIdentityServiceProvider.780qhrdegeu08g7nlb81bqpuvv.64d8a418-30d1-7034-2372-8916a3cb4a4b.clockDrift",
+          "value": "2095"
+        },
+        {
+          "name": "CognitoIdentityServiceProvider.780qhrdegeu08g7nlb81bqpuvv.64d8a418-30d1-7034-2372-8916a3cb4a4b.refreshToken",
+          "value": "eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ.VmwKoAPNlaFAFj-n_OT5pDMquhmkZEnSrSD4QgPkpKBq1lLhumj9nBAiNwgu0pbhW3AR2c8MbHbxAtv6-DbCgDgO2greHzLWwalVuDL3z4OYS9aoNjbPksScwcYgcMxtFf4RxG5Lth2MXs436_lRe6odORKpYoAaYd-YhlWuGUAbXVj8GNn0k83qtWv4VnwAKHZKesmjgrQaW8qAJnqP7kwzNesWpXzsZDnZXHPKaItdZSflaNgbKfC2Og9vEPflTCaOgo7F9dKPbh7h3DUvm9WsSH86Pk1J7pGz1dvbbhA26C5qvOukQBI2Qemc8jQzRrRdf07WX19jO7ahd0iBhw.VPEHOJVv-3sZAs2N.0SOUU_oVSucE_WAT-DR3AjviFVBks_xMnqFSVbV57JdL5AKf0upDfCHpglq_qBTaWteJZKTDKHHe0OouiXAz2R5H1T0gfTWvGYM08bUtU_vInqgXJwTEVIfNNeq82NE1goizQX9ws-1EU2mQpGmD28gjX7Pjf1QSnZ5lzsYyJ3o5zjvauuNxNtcWXubzZ6N9Rbp9kWegJNXs2tig1g06AT-5my53i1U45OjB6jJ7flPu447XJm8UXNnhw0aqhscu8FaJtnD52Lpy1C3vcztV0k0xdKQAf-DRkXm1FVJvQ8jMVk7KJutwlHux3wPwuJVRxsZ69oF1sUIgt9Hrj-mh64KBwiUYmTw41N5oU_9fPpI9lZjW2jTC4sQToV7yy4CFx_88_Kn1KLajE88bNurSK32b2AP3TmN5k0gCOaGaziS4eFAY5GuCxzRHA-ug4tegfxcB2AZyiC79PczZeBAuHB4doBTB0YnKRchWVfkxQee7N4LqgQ6fA-WYgU9e33fgN30km96qmZERDSangcDdMU_pdwF-glUe4XvArI_NszvkW97-rNU_9ADH3nBWtUbISoXBW-6Ywg6mjTz65UXY6s9jEXhKw3u1_zM6afJEQp37p7U7EFTmz77BMVn3GIzEMM-sNIPtUthCV46yS4cTvIbEV6imC-5Bq1YSZlq3rLLtpQ81ZmuUoMwo9Ty1SEIHKBGtalgHm3b5nfHwqveW-rW1MRU8AGr5JcrdWnWlv1iU9809bUFXHWyZjrXTA07cBEWJJ6c6cBEfBw7sP6dgW596ZfUrLVO51Dcv9Qx1wL9g9jlwOx7tCXCkHIfH57Lfvj-Tzib2WWobeQt69q9O_A2xTTBrlzNil1658kuYJiRYEvObR1Y0vOwJ_fAkkehd_EW4hLbdkGDFnr9PZiNr99B4U4zTQamtaEh9bMU2IKofzHYvUUwFgywZjk82rgeECSUUoLo323QnqVSYfaIhh8WPqGEQoHEcisVKbv0w-pF5aMIkOfgzvfQTgtBHSkiGbfsGtnoUcjLLI8fm0tc2hMXHNsNjdoi9p9C6J3GSggjYsxH0ynNGkxFNRqcpufLEzsWUE1gSYr99tXx5DwLZIYzSooReWwY_QljdA_H3FfWBSGxIssv4YZpbI2P_MXHb4yvg8n25mxvnzWmuOfeqXCEvUHr3gblojxIOK9OKd50CG6g_K5MAr3GXG9ofgqPIHECae3LNM-9ss8iisxNlopZwsmcY5YhVNv7N7U-Q_JH7EARD_cjO7WIFhBUpKK6Um79uSZvjLRHPIvMCRHOlTussl91eRFHywoCgDeqU-0mnJFt0c9yj._Va9x903hupoUCFOPz4TCw"
+        }
+      ]
+    }
+  ]
+}
