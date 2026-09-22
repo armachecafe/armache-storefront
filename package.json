@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "sync:contract": "npx @armachecafe/openapi-client --contract storefront --output src/types/api.ts",
+    "prebuild": "pnpm sync:contract",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -10,7 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@armachecafe/openapi-client": "^1.0.0",
+    "@armachecafe/openapi-client": "^2.0.0",
     "aws-amplify": "6.6.0",
     "class-variance-authority": "0.7.0",
     "clsx": "2.1.1",
