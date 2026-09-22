@@ -1,3 +1,4 @@
 minimumReleaseAgeExclude:
   - '@armachecafe/openapi-client@1.0.0'
   - '@armachecafe/openapi-client@2.0.0'
+  - '@armachecafe/openapi-client@2.0.1'
