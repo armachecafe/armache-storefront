@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@armachecafe/openapi-client": "^2.1.0",
+    "@armachecafe/openapi-client": "^2.1.1",
     "aws-amplify": "6.6.0",
     "class-variance-authority": "0.7.0",
     "clsx": "2.1.1",
