@@ -1,0 +1,2 @@
+minimumReleaseAgeExclude:
+  - '@armachecafe/openapi-client@1.0.0'
