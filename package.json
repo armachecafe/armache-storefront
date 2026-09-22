@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "sync:contract": "npx @armachecafe/openapi-client --contract storefront --output src/types/api.ts",
+    "sync:contract": "aws s3 cp s3://armache-contracts/storefront/latest/spec.yaml /tmp/storefront-spec.yaml && npx @armachecafe/openapi-client --spec /tmp/storefront-spec.yaml --contract storefront --output src/types/api.ts",
     "prebuild": "pnpm sync:contract",
     "dev": "next dev",
     "build": "next build",
