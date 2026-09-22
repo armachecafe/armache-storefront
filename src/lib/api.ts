@@ -3,7 +3,7 @@
  * Calls the API Gateway endpoints.
  *
  * CONTRACT-FIRST (integration-contracts SDD):
- * The OpenAPI contract (openapi/storefront.yaml, via @armache/openapi-client) is
+ * The OpenAPI contract (openapi/storefront.yaml, via @armachecafe/openapi-client) is
  * the SINGLE SOURCE OF TRUTH for backend request/response shapes. This module
  * imports the generated `components['schemas']` types as `Contract*` and maps
  * them to the storefront's UI-facing types in ONE place — the wrappers below.
@@ -17,7 +17,7 @@
  */
 
 import { getIdToken } from '@/lib/auth';
-import type { components } from '@armache/openapi-client';
+import type { components } from '@armachecafe/openapi-client';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.armachecafe.com';
 
