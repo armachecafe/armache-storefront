@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { ProductSummary } from '@/lib/api';
@@ -19,6 +22,10 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
 function ProductCard({ product }: { product: ProductSummary }) {
   const price = ((product.priceCents ?? 0) / 100).toFixed(2);
   const comparePrice = product.compareAtPriceCents ? (product.compareAtPriceCents / 100).toFixed(2) : null;
+  // Si el CDN responde 403/404 (objetos legacy ausentes), degradamos al placeholder
+  // en vez de dejar el icono de imagen rota.
+  const [imgError, setImgError] = useState(false);
+  const showImage = Boolean(product.thumbnailUrl) && !imgError;
 
   return (
     // Static route + query param (?slug=): reliable in static export. A dynamic [slug]
@@ -31,16 +38,21 @@ function ProductCard({ product }: { product: ProductSummary }) {
     >
       {/* Image */}
       <div className="aspect-square bg-gray-50 relative overflow-hidden">
-        {product.thumbnailUrl ? (
+        {showImage ? (
           <Image
-            src={product.thumbnailUrl}
+            src={product.thumbnailUrl as string}
             alt={product.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            data-testid={`product-card-image-${product.slug}`}
+            onError={() => setImgError(true)}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300">
+          <div
+            className="w-full h-full flex items-center justify-center text-gray-300"
+            data-testid={`product-card-image-fallback-${product.slug}`}
+          >
             <span className="text-4xl">☕</span>
           </div>
         )}

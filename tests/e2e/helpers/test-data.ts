@@ -192,3 +192,44 @@ export const MOCK_LOT_PROFILE = {
   processType: 'Lavado',
   producedBy: 'Armache Café',
 };
+
+/**
+ * Respuesta fiel al backend REAL de GET /storefront/products (2026-09-24):
+ * registros crudos Dynamo — sin `thumbnailUrl`, con PK/SK/GSI y, solo en
+ * productos con fotos nuevas, `primaryImageId` + `imageCount`.
+ * Sirve para probar el fallback del storefront (mapProductSummary).
+ */
+export const MOCK_PRODUCTS_RAW = {
+  items: [
+    {
+      productId: 'prod-006',
+      slug: 'drip-bag-caja-10',
+      name: 'Variedad Pache - Proceso Lavado',
+      shortDescription: 'Café filtrado portátil, caja de 10 unidades',
+      categoryId: 'nuestro-cafe',
+      priceCents: 4500,
+      inStock: true,
+      featured: true,
+      primaryImageId: '15cd090c-ddad-4af5-b132-8a8bd789c231',
+      imageCount: 2,
+      imageVersion: 17,
+      PK: 'PROD#prod-006',
+      SK: 'META',
+      GSI1PK: 'CAT#nuestro-cafe',
+      coffeeAttributes: { origin: 'San Ignacio, Cajamarca', process: 'Lavado', roastLevel: 'Medio' },
+    },
+    {
+      productId: 'prod-005',
+      slug: 'miel-de-cafe-250ml',
+      name: 'Miel de Café 250ml',
+      shortDescription: 'Miel artesanal infusionada con café',
+      categoryId: 'derivados',
+      priceCents: 3500,
+      inStock: true,
+      featured: false,
+      PK: 'PROD#prod-005',
+      SK: 'META',
+    },
+  ],
+  nextCursor: undefined,
+};

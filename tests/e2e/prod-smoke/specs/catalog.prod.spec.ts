@@ -23,6 +23,30 @@ test.describe('prod-smoke: catalog', () => {
     expect(problems.serverErrors, describeProblems(problems)).toHaveLength(0);
   });
 
+  test('catalog listing shows product images and no broken CDN assets', async ({ page }) => {
+    // Regresión 2026-09-24: el listado mostraba 0 imágenes (placeholder en todo)
+    // sin ningún error JS ni 5xx. Este smoke falla si ninguna imagen del CDN
+    // carga, o si algún asset del CDN responde 4xx/5xx (objetos legacy con 403).
+    const problems = attachConsoleGuard(page, test.info());
+    const badCdn: string[] = [];
+    page.on('response', (res) => {
+      if (res.url().includes('cdn.armachecafe.com') && res.status() >= 400) {
+        badCdn.push(`${res.status()} ${res.url()}`);
+      }
+    });
+    await page.goto('/catalogo/');
+    await expect(page.getByTestId('category-filters')).toBeVisible({ timeout: 15000 });
+    await page.waitForLoadState('networkidle');
+    const loadedImages = await page
+      .locator('[data-testid^="product-card-image-"]:not([data-testid*="fallback"])')
+      .evaluateAll((imgs: HTMLImageElement[]) =>
+        imgs.filter((img) => img.complete && img.naturalWidth > 0).length,
+      );
+    expect(loadedImages, 'product cards with loaded CDN images').toBeGreaterThan(0);
+    expect(badCdn, `broken CDN assets:\n${badCdn.join('\n')}`).toHaveLength(0);
+    expect(problems.serverErrors, describeProblems(problems)).toHaveLength(0);
+  });
+
   test('product detail page loads without errors', async ({ page }) => {
     const problems = attachConsoleGuard(page, test.info());
 

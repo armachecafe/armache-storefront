@@ -10,6 +10,7 @@ import { CheckoutPage } from './pages/checkout-page';
 import { ProfilePage } from './pages/profile-page';
 import { EmpresasPage } from './pages/empresas-page';
 import { mockPublicApis, mockEmptyCart } from './helpers/api-mocks';
+import { MOCK_PRODUCTS_RAW } from './helpers/test-data';
 import { injectAuthSession } from './helpers/amplify-auth-mock';
 
 type Fixtures = {
@@ -18,6 +19,8 @@ type Fixtures = {
   registerPage: RegisterPage;
   forgotPasswordPage: ForgotPasswordPage;
   catalogPage: CatalogPage;
+  /** Catálogo con el listado crudo real del backend (sin thumbnailUrl) */
+  rawCatalogPage: CatalogPage;
   productDetailPage: ProductDetailPage;
   cartPage: CartPage;
   checkoutPage: CheckoutPage;
@@ -48,6 +51,11 @@ export const test = base.extend<Fixtures>({
   },
   catalogPage: async ({ page }, use) => {
     await mockPublicApis(page);
+    await mockEmptyCart(page);
+    await use(new CatalogPage(page));
+  },
+  rawCatalogPage: async ({ page }, use) => {
+    await mockPublicApis(page, { listingOverride: MOCK_PRODUCTS_RAW });
     await mockEmptyCart(page);
     await use(new CatalogPage(page));
   },
