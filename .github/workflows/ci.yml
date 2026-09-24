@@ -19,6 +19,12 @@ jobs:
           cache: 'pnpm'
           registry-url: 'https://npm.pkg.github.com'
 
+      # pnpm ignores ${...} auth from the repo-controlled .npmrc, so the
+      # GitHub Packages token must live in user-level config for both
+      # download and lockfile supply-chain verification.
+      - name: Authenticate pnpm to GitHub Packages
+        run: pnpm config set //npm.pkg.github.com/:_authToken "${{ secrets.GITHUB_TOKEN }}" --global
+
       - name: Install
         run: pnpm install --frozen-lockfile
         env:
