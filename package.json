@@ -2,6 +2,7 @@
   "name": "@armache/storefront",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@11.5.3",
   "scripts": {
     "sync:contract": "aws s3 cp s3://armache-contracts/storefront/latest/spec.yaml /tmp/storefront-spec.yaml && ./node_modules/.bin/armache-sync-contract --spec /tmp/storefront-spec.yaml --contract storefront --output src/types/api.ts",
     "prebuild": "pnpm sync:contract",
