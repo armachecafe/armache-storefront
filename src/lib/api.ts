@@ -35,7 +35,15 @@ type ContractPaymentResult = ContractSchemas['PaymentResult'];
 // Types that already match the UI shape are re-exported directly from the
 // contract (no mapping needed).
 export type ProductImage = ContractSchemas['Image'];
-export type ProductSummary = ContractSchemas['ProductSummary'];
+type ContractProductSummary = ContractSchemas['ProductSummary'];
+//
+// UI-facing ProductSummary. El backend /storefront/products hoy devuelve
+// registros crudos Dynamo (PK/SK/GSI, primaryImageId, sin thumbnailUrl)
+// mientras /storefront/products/featured sí devuelve thumbnailUrl.
+// Se mantiene la forma UI histórica (thumbnailUrl?) y se mapea abajo.
+export type ProductSummary = Omit<ContractProductSummary, 'thumbnailUrl'> & {
+  thumbnailUrl?: string;
+};
 export type Category = ContractSchemas['Category'];
 export type Theme = ContractSchemas['Theme'];
 export type UserProfile = ContractSchemas['UserProfile'];
@@ -222,6 +230,30 @@ function mapPaymentResult(result: ContractPaymentResult): PaymentResult {
   };
 }
 
+const CATALOG_CDN_BASE = 'https://cdn.armachecafe.com';
+
+/**
+ * Normaliza un ProductSummary del backend a la forma UI (thumbnailUrl).
+ * Tolera: thumbnailUrl (featured + mocks), imageUrl (x-known-divergence),
+ * y registros crudos de /storefront/products (primaryImageId + productId).
+ */
+function mapProductSummary(raw: ContractProductSummary & Record<string, unknown>): ProductSummary {
+  const record = raw as Record<string, unknown>;
+  const direct =
+    (record['thumbnailUrl'] as string | undefined) ??
+    (record['imageUrl'] as string | undefined) ??
+    (record['thumbnail'] as string | undefined) ??
+    undefined;
+  const productId = record['productId'] as string | undefined;
+  const primaryImageId = record['primaryImageId'] as string | undefined;
+  const thumbnailUrl =
+    direct ??
+    (productId && primaryImageId
+      ? `${CATALOG_CDN_BASE}/catalog/products/${productId}/${primaryImageId}`
+      : undefined);
+  return { ...(raw as object), thumbnailUrl } as ProductSummary;
+}
+
 /** Maps the UI PrepareCheckoutInput to the backend contract body. */
 function mapPrepareCheckoutBody(input: PrepareCheckoutInput): unknown {
   const isPickup = input.shippingMethod === 'PICKUP' || input.shippingMethod === 'pickup';
@@ -321,7 +353,9 @@ export const api = {
   getTheme: () =>
     fetchApi<{ theme: Theme }>('/storefront/theme').then((r) => r.theme),
   getFeaturedProducts: (limit = 6) =>
-    fetchApi<{ products: ProductSummary[] }>(`/storefront/products/featured?limit=${limit}`).then((r) => r.products),
+    fetchApi<{ products: ProductSummary[] }>(`/storefront/products/featured?limit=${limit}`).then((r) =>
+      (r.products ?? []).map(mapProductSummary),
+    ),
   getCategories: () =>
     fetchApi<{ level1: Category[]; children: Record<string, Category[]> }>('/storefront/categories'),
   getProducts: (params?: { category?: string; limit?: number; cursor?: string }) => {
@@ -329,7 +363,10 @@ export const api = {
     if (params?.category) qs.set('category', params.category);
     if (params?.limit) qs.set('limit', String(params.limit));
     if (params?.cursor) qs.set('cursor', params.cursor);
-    return fetchApi<{ items: ProductSummary[]; nextCursor?: string }>(`/storefront/products?${qs}`);
+    return fetchApi<{ items: ProductSummary[]; nextCursor?: string }>(`/storefront/products?${qs}`).then((r) => ({
+      items: (r.items ?? []).map(mapProductSummary),
+      nextCursor: r.nextCursor,
+    }));
   },
   getProductBySlug: (slug: string) =>
     fetchApi<{
