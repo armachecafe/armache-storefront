@@ -20,7 +20,8 @@ export class ProductDetailPage {
   }
 
   async goto(slug: string) {
-    await this.page.goto(`/catalogo/${slug}/`);
+    // La app usa ruta estática + query param (?slug=), no ruta dinámica [slug].
+    await this.page.goto(`/catalogo/producto/?slug=${slug}`);
   }
 
   async addToCart() {

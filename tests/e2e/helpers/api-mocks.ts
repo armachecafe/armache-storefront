@@ -24,13 +24,16 @@ function json(data: unknown, status = 200) {
   };
 }
 
-/** Mock all public storefront APIs (no auth required) */
-export async function mockPublicApis(page: Page) {
+/** Mock all public storefront APIs (no auth required).
+ * `listingOverride` reemplaza la respuesta de GET /storefront/products —
+ * usar MOCK_PRODUCTS_RAW para ejercitar la forma cruda real del backend. */
+export async function mockPublicApis(page: Page, opts?: { listingOverride?: unknown }) {
+  const listing = opts?.listingOverride ?? MOCK_PRODUCTS;
   await page.route(`${API_BASE}/storefront/theme`, (route) => route.fulfill(json(MOCK_THEME)));
   await page.route(`${API_BASE}/storefront/categories`, (route) => route.fulfill(json(MOCK_CATEGORIES)));
   await page.route(`${API_BASE}/storefront/products/featured*`, (route) => route.fulfill(json({ products: MOCK_PRODUCTS.items })));
-  await page.route(`${API_BASE}/storefront/products?*`, (route) => route.fulfill(json(MOCK_PRODUCTS)));
-  await page.route(`${API_BASE}/storefront/products`, (route) => route.fulfill(json(MOCK_PRODUCTS)));
+  await page.route(`${API_BASE}/storefront/products?*`, (route) => route.fulfill(json(listing)));
+  await page.route(`${API_BASE}/storefront/products`, (route) => route.fulfill(json(listing)));
   await page.route(`${API_BASE}/storefront/products/cafe-san-ignacio-250g`, (route) => route.fulfill(json(MOCK_PRODUCT_DETAIL)));
   await page.route(`${API_BASE}/storefront/products/*`, (route) => route.fulfill(json(MOCK_PRODUCT_DETAIL)));
 }
