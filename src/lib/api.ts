@@ -29,6 +29,7 @@ type ContractSchemas = components['schemas'];
 type ContractCart = ContractSchemas['Cart'];
 type ContractCartItem = ContractSchemas['CartItem'];
 type ContractCheckoutSession = ContractSchemas['CheckoutSession'];
+type ContractCheckoutItem = NonNullable<ContractCheckoutSession['items']>[number];
 type ContractShippingQuote = ContractSchemas['ShippingQuote'];
 type ContractPaymentResult = ContractSchemas['PaymentResult'];
 
@@ -198,7 +199,7 @@ function mapCheckoutSession(session: ContractCheckoutSession): CheckoutSession {
     status: session.status,
     totalCents: session.total,
     shippingCents: session.shippingCost,
-    items: (session.items ?? []).map((it) => ({
+    items: (session.items ?? []).map((it: ContractCheckoutItem) => ({
       itemId: it.sku, // checkout items are keyed by sku; no itemId in contract
       sku: it.sku,
       name: it.productName,
