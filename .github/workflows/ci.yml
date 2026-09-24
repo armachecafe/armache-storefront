@@ -23,7 +23,7 @@ jobs:
       # GitHub Packages token must live in user-level config for both
       # download and lockfile supply-chain verification.
       - name: Authenticate pnpm to GitHub Packages
-        run: pnpm config set //npm.pkg.github.com/:_authToken "${{ secrets.GITHUB_TOKEN }}" --global
+        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
 
       - name: Install
         run: pnpm install --frozen-lockfile
