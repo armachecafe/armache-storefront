@@ -1,7 +1,7 @@
 'use client';
 
 import { Package, Truck, MapPin } from 'lucide-react';
-import type { OrderDetail as OrderDetailType } from '@/lib/api';
+import type { OrderDetail as OrderDetailType, OrderTimeline, OrderItem } from '@/lib/api';
 import { OrderStatusBadge } from '@/components/orders/order-status-badge';
 
 interface OrderDetailProps {
@@ -35,7 +35,7 @@ export function OrderDetail({ order }: OrderDetailProps) {
         <div className="border border-gray-100 rounded-lg p-4">
           <h3 className="text-sm font-semibold text-gray-900 mb-3">Estado del pedido</h3>
           <ol className="space-y-3">
-            {order.timeline.map((event, idx) => (
+            {order.timeline.map((event: OrderTimeline, idx: number) => (
               <li key={idx} className="flex items-start gap-3">
                 <div className={`w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0 ${idx === 0 ? 'bg-brand-primary' : 'bg-gray-300'}`} />
                 <div>
@@ -73,7 +73,7 @@ export function OrderDetail({ order }: OrderDetailProps) {
           <Package className="w-4 h-4" /> Productos
         </h3>
         <div className="space-y-3">
-          {order.items.map((item, idx) => (
+          {order.items.map((item: OrderItem, idx: number) => (
             <div key={idx} className="flex justify-between text-sm">
               <div>
                 <p className="font-medium text-gray-900">{item.name}</p>
