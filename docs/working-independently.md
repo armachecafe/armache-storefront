@@ -91,8 +91,9 @@ Types in `src/types/api.ts` are **generated**, not hand-written:
 - `pnpm sync:contract` downloads the spec from `s3://armache-contracts/storefront/latest/spec.yaml`
   (needs AWS creds, section 2.2) and regenerates `src/types/api.ts` via the
   `armache-sync-contract` binary shipped with `@armachecafe/openapi-client`.
-- `prebuild` runs `sync:contract` automatically, so every `pnpm build` uses a
-  fresh contract.
+- `prebuild` runs `scripts/ci-contract-guard.sh`: with AWS it syncs fresh types;
+  without AWS (CI) it keeps existing types or creates a minimal stub so the
+  build stays green. `src/types/api.ts` is gitignored — never commit it.
 
 If the backend team publishes a breaking contract change, re-run
 `pnpm sync:contract`, fix type errors, and commit the regenerated file together
