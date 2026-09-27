@@ -25,5 +25,6 @@ tests/e2e/prod-smoke/.auth/
 src/types/api.ts
 src/types/client.ts
 .contract-lock.json
-# Local Pi runtime state
+# Local Pi runtime state (skill registry cache, ODD task documents)
 .atl/
+odd/
