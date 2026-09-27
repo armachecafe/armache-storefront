@@ -14,7 +14,9 @@ permissions:
 
 jobs:
   build-test:
-    runs-on: ubuntu-latest
+    # Pinned explicitly instead of ubuntu-latest so the OS image only changes
+    # through a reviewed commit (ubuntu-latest moves to 26.04 from 2026-10-19).
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v6
 
