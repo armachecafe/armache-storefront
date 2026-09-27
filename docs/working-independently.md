@@ -14,7 +14,7 @@ Stack: **Next.js 14.2.5 + React 18 + Tailwind 3 + pnpm**, static export
 
 | Tool | Version / note |
 |---|---|
-| Node.js | 22 (`node --version`) |
+| Node.js | 24 LTS, pinned in `.nvmrc` (`nvm use`; `node --version`) |
 | pnpm | 11 (`pnpm --version`) |
 | AWS CLI | v2, with the SSO profile configured in `~/.aws/config` (`481084557193_AdministratorAccess`) |
 | Git over SSH | `git@github.com:armachecafe/armache-storefront.git` — push/pull needs no extra auth |

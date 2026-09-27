@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@11.5.3",
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
     "sync:contract": "aws s3 cp s3://armache-contracts/storefront/latest/spec.yaml /tmp/storefront-spec.yaml && ./node_modules/.bin/armache-sync-contract --spec /tmp/storefront-spec.yaml --contract storefront --output src/types/api.ts",
     "prebuild": "bash scripts/ci-contract-guard.sh",
@@ -26,7 +29,7 @@
   },
   "devDependencies": {
     "@playwright/test": "1.45.3",
-    "@types/node": "20.14.10",
+    "@types/node": "24.19.0",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
     "autoprefixer": "10.4.19",

@@ -16,18 +16,19 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      # Pin pnpm to 11.5.3 (matches local and packageManager) so pnpm/action-setup@v4
+      # Pin pnpm to 11.5.3 (matches local and packageManager) so pnpm/action-setup
       # never fails with "No pnpm version is specified". Both package.json:packageManager
       # and this version field are required by the action (exact match).
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           version: 11.5.3
 
-      - uses: actions/setup-node@v4
+      # Node version comes from .nvmrc (single source of truth with local nvm).
+      - uses: actions/setup-node@v6
         with:
-          node-version: '22'
+          node-version-file: '.nvmrc'
           cache: 'pnpm'
           registry-url: 'https://npm.pkg.github.com'
 
