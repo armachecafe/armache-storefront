@@ -10,6 +10,11 @@ out/
 test-results/
 playwright-report/
 playwright/.cache/
+# Prod-smoke storageState, written on every run by tests/e2e/prod-smoke/global-setup.ts
+tests/e2e/prod-smoke/.auth/
+
+# TypeScript incremental build cache (tsconfig "incremental": true)
+*.tsbuildinfo
 
 # Misc
 .DS_Store
@@ -20,3 +25,5 @@ playwright/.cache/
 src/types/api.ts
 src/types/client.ts
 .contract-lock.json
+# Local Pi runtime state
+.atl/

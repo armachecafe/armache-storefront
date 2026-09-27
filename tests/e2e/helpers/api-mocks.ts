@@ -50,8 +50,22 @@ export async function mockEmptyCart(page: Page) {
   await page.route(`${API_BASE}/cart/merge`, (route) => route.fulfill(json(MOCK_EMPTY_CART)));
 }
 
-/** Mock cart APIs with items */
+/** localStorage key of the guest cart (must match src/lib/local-cart.ts). */
+const LOCAL_CART_STORAGE_KEY = 'armache_local_cart';
+
+/**
+ * Cart with items.
+ * Guests never call GET /cart: CartContext reads the cart from localStorage
+ * (src/lib/local-cart.ts), so the guest cart is seeded there. The API routes
+ * stay mocked for authenticated flows.
+ */
 export async function mockCartWithItems(page: Page) {
+  await page.addInitScript(
+    ({ key, cart }) => {
+      localStorage.setItem(key, JSON.stringify(cart));
+    },
+    { key: LOCAL_CART_STORAGE_KEY, cart: MOCK_CART.cart },
+  );
   await page.route(`${API_BASE}/cart`, (route) => route.fulfill(json(MOCK_CART)));
   await page.route(`${API_BASE}/cart/items`, (route) => route.fulfill(json(MOCK_CART)));
   await page.route(`${API_BASE}/cart/shipping`, (route) => route.fulfill(json(MOCK_SHIPPING_QUOTES)));
