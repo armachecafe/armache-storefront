@@ -5,12 +5,9 @@ test.describe('Checkout', () => {
   test.beforeEach(async ({ page }) => {
     await mockPublicApis(page);
     await mockCheckout(page);
-    // Mock Cognito so that fetchAuthSession() resolves quickly (no auth = guest mode)
+    // Mock Cognito so that fetchAuthSession() resolves quickly (no auth = guest mode).
+    // The guest cart itself is seeded in localStorage by mockCartWithItems (via mockCheckout).
     await mockCognitoSuccess(page);
-    // Pre-seed localStorage with a guest cart ID so CartContext doesn't start empty
-    await page.addInitScript(() => {
-      localStorage.setItem('armache_cart_id', 'cart-001');
-    });
   });
 
   test('shows shipping form on step 1', async ({ checkoutPage }) => {
