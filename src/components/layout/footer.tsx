@@ -3,7 +3,7 @@ import Link from 'next/link';
 export function Footer() {
   return (
     <footer className="bg-brand-dark text-white py-12">
-      <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Brand */}
         <div>
           <h3 className="font-display text-xl mb-3">Armache Café</h3>
@@ -20,6 +20,16 @@ export function Footer() {
             <li><Link href="/catalogo?category=nuestro-cafe" className="hover:text-brand-accent">Nuestro Café</Link></li>
             <li><Link href="/catalogo?category=derivados" className="hover:text-brand-accent">Derivados</Link></li>
             <li><Link href="/empresas" className="hover:text-brand-accent">Empresas</Link></li>
+          </ul>
+        </div>
+
+        {/* Empresa */}
+        <div data-testid="footer-company">
+          <h4 className="font-semibold mb-3">Empresa</h4>
+          <ul className="space-y-2 text-sm text-gray-300">
+            <li>GPAL EQUIPAMIENTOS S.A.C.</li>
+            <li>RUC 20607092631</li>
+            <li><Link href="/empresa" className="hover:text-brand-accent">Información de la empresa</Link></li>
           </ul>
         </div>
 
