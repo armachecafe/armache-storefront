@@ -17,6 +17,8 @@ export const COMPANY = {
   taxId: '20607092631',
   taxStatus: 'Activo — Habido (ficha pública)',
   address: {
+    /** Physical store (cafeteria) — NOT the fiscal domicile. */
+    kind: 'Tienda física',
     street: 'Calle 7 418',
     district: 'Los Olivos',
     postalCode: '15307',
@@ -24,6 +26,8 @@ export const COMPANY = {
     country: 'Perú',
     countryCode: 'PE',
   },
+  /** Fiscal domicile is unpublished (unverified); see the SUNAT record. */
+  fiscalDomicileNote: 'Según ficha RUC — ver en SUNAT',
   phones: {
     /** Published in the site footer. */
     sales: ['947 258 244', '947 389 156'],
