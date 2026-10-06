@@ -30,7 +30,7 @@ export function Footer() {
           <ul className="space-y-2 text-sm text-gray-300">
             <li>{COMPANY.legalName}</li>
             <li>RUC {COMPANY.taxId}</li>
-            <li>{companyAddressLine()}</li>
+            <li>{COMPANY.address.kind}: {companyAddressLine()}</li>
             <li><Link href="/empresa" className="hover:text-brand-accent">Información de la empresa</Link></li>
             <li><Link href="/politica-privacidad" className="hover:text-brand-accent">Política de Privacidad</Link></li>
             <li><Link href="/terminos" className="hover:text-brand-accent">Términos y Condiciones</Link></li>

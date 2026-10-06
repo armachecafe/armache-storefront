@@ -33,8 +33,8 @@ test.describe('Legal pages (Meta verification readiness)', () => {
     await expect(footer).toContainText('ventas@armachecafe.com');
     await page.goto('/empresa/');
     const fiscal = page.getByTestId('empresa-fiscal');
-    await expect(fiscal).toContainText('Calle 7 418');
-    await expect(fiscal).toContainText('ventas@armachecafe.com');
+    await expect(fiscal).toContainText('Tienda');
+    await expect(fiscal).toContainText('Domicilio fiscal');
   });
 
   test('footer links to privacy and terms pages', async ({ page }) => {

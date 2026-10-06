@@ -71,8 +71,12 @@ export default function EmpresaPage() {
             <dd className="font-semibold text-gray-900">{COMPANY.taxStatus}</dd>
           </div>
           <div>
-            <dt className="text-gray-500">Domicilio</dt>
+            <dt className="text-gray-500">Tienda</dt>
             <dd className="font-semibold text-gray-900">{companyAddressLine()}</dd>
+          </div>
+          <div>
+            <dt className="text-gray-500">Domicilio fiscal</dt>
+            <dd className="font-semibold text-gray-900">{COMPANY.fiscalDomicileNote}</dd>
           </div>
           <div>
             <dt className="text-gray-500">Marca comercial</dt>
@@ -199,7 +203,7 @@ export default function EmpresaPage() {
             <h2 className="text-2xl font-display font-bold text-gray-900">Contacto</h2>
           </div>
           <ul className="text-gray-600 space-y-2">
-            <li>📍 {companyAddressLine()}</li>
+            <li>📍 Tienda: {companyAddressLine()}</li>
             <li>📞 {COMPANY.phones.sales.join(' / ')}</li>
             <li>📞 {COMPANY.phones.store} (cafetería)</li>
             <li>✉️ {COMPANY.email}</li>
