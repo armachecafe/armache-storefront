@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Building2, History, UserCheck, Phone } from 'lucide-react';
+import { COMPANY, companyAddressLine } from '@/lib/company';
 
 export const metadata: Metadata = {
   title: 'Nuestra Empresa — Armache Café',
@@ -10,16 +11,21 @@ export const metadata: Metadata = {
 const ORG_JSON_LD = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: 'Armache Café',
-  legalName: 'GPAL EQUIPAMIENTOS S.A.C.',
-  taxID: '20607092631',
-  url: 'https://armachecafe.com',
+  name: COMPANY.brandName,
+  legalName: COMPANY.legalName,
+  taxID: COMPANY.taxId,
+  url: COMPANY.website,
+  email: COMPANY.email,
+  telephone: `+51 ${COMPANY.phones.sales[0]}`,
   address: {
     '@type': 'PostalAddress',
-    addressLocality: 'Los Olivos',
-    addressRegion: 'Lima',
-    addressCountry: 'PE',
+    streetAddress: COMPANY.address.street,
+    addressLocality: COMPANY.address.district,
+    postalCode: COMPANY.address.postalCode,
+    addressRegion: COMPANY.address.city,
+    addressCountry: COMPANY.address.countryCode,
   },
+  sameAs: [...COMPANY.sameAs],
 };
 
 export default function EmpresaPage() {
@@ -40,7 +46,7 @@ export default function EmpresaPage() {
             Nuestra Empresa
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Armache Café es la marca comercial de GPAL EQUIPAMIENTOS S.A.C.,
+            {COMPANY.brandName} es la marca comercial de {COMPANY.legalName},
             empresa peruana registrada ante la SUNAT.
           </p>
         </div>
@@ -54,19 +60,27 @@ export default function EmpresaPage() {
         <dl className="bg-white border border-gray-200 rounded-xl p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div>
             <dt className="text-gray-500">Razón social</dt>
-            <dd className="font-semibold text-gray-900">GPAL EQUIPAMIENTOS S.A.C.</dd>
+            <dd className="font-semibold text-gray-900">{COMPANY.legalName}</dd>
           </div>
           <div>
             <dt className="text-gray-500">RUC</dt>
-            <dd className="font-semibold text-gray-900">20607092631</dd>
+            <dd className="font-semibold text-gray-900">{COMPANY.taxId}</dd>
           </div>
           <div>
             <dt className="text-gray-500">Estado del contribuyente</dt>
-            <dd className="font-semibold text-gray-900">Activo — Habido (ficha pública)</dd>
+            <dd className="font-semibold text-gray-900">{COMPANY.taxStatus}</dd>
+          </div>
+          <div>
+            <dt className="text-gray-500">Domicilio</dt>
+            <dd className="font-semibold text-gray-900">{companyAddressLine()}</dd>
           </div>
           <div>
             <dt className="text-gray-500">Marca comercial</dt>
-            <dd className="font-semibold text-gray-900">Armache Café</dd>
+            <dd className="font-semibold text-gray-900">{COMPANY.brandName}</dd>
+          </div>
+          <div>
+            <dt className="text-gray-500">Correo</dt>
+            <dd className="font-semibold text-gray-900">{COMPANY.email}</dd>
           </div>
         </dl>
         <p className="text-sm text-gray-500 mt-4">
@@ -171,8 +185,8 @@ export default function EmpresaPage() {
           </h2>
         </div>
         <p className="text-gray-600">
-          <strong className="text-gray-900">Carlos Raul Laura Arenas</strong>, principal
-          accionista y representante legal de GPAL EQUIPAMIENTOS S.A.C.{' '}
+          <strong className="text-gray-900">{COMPANY.representative.name}</strong>,{' '}
+          {COMPANY.representative.role.toLowerCase()} de {COMPANY.legalName}.{' '}
           <span className="text-sm text-gray-500">(información proporcionada por la empresa).</span>
         </p>
       </section>
@@ -185,9 +199,10 @@ export default function EmpresaPage() {
             <h2 className="text-2xl font-display font-bold text-gray-900">Contacto</h2>
           </div>
           <ul className="text-gray-600 space-y-2">
-            <li>📍 Calle 7 418, Los Olivos 15307, Lima — Perú</li>
-            <li>📞 947 258 244 / 947 389 156</li>
-            <li>📞 906 381 389 (cafetería)</li>
+            <li>📍 {companyAddressLine()}</li>
+            <li>📞 {COMPANY.phones.sales.join(' / ')}</li>
+            <li>📞 {COMPANY.phones.store} (cafetería)</li>
+            <li>✉️ {COMPANY.email}</li>
             <li>
               📘{' '}
               <a

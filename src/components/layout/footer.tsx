@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { COMPANY, companyAddressLine } from '@/lib/company';
 
 export function Footer() {
   return (
@@ -27,9 +28,12 @@ export function Footer() {
         <div data-testid="footer-company">
           <h4 className="font-semibold mb-3">Empresa</h4>
           <ul className="space-y-2 text-sm text-gray-300">
-            <li>GPAL EQUIPAMIENTOS S.A.C.</li>
-            <li>RUC 20607092631</li>
+            <li>{COMPANY.legalName}</li>
+            <li>RUC {COMPANY.taxId}</li>
+            <li>{companyAddressLine()}</li>
             <li><Link href="/empresa" className="hover:text-brand-accent">Información de la empresa</Link></li>
+            <li><Link href="/politica-privacidad" className="hover:text-brand-accent">Política de Privacidad</Link></li>
+            <li><Link href="/terminos" className="hover:text-brand-accent">Términos y Condiciones</Link></li>
           </ul>
         </div>
 
@@ -37,9 +41,10 @@ export function Footer() {
         <div>
           <h4 className="font-semibold mb-3">Contacto</h4>
           <ul className="space-y-2 text-sm text-gray-300">
-            <li>📞 947 258 244 / 947 389 156</li>
-            <li>📷 @armachecafe</li>
-            <li>📘 /cafearmache</li>
+            <li>📞 {COMPANY.phones.sales.join(' / ')}</li>
+            <li>✉️ {COMPANY.email}</li>
+            <li>📷 <a href="https://www.instagram.com/armache_cafeteria" target="_blank" rel="noopener noreferrer" className="hover:text-brand-accent">@armache_cafeteria</a></li>
+            <li>📘 <a href="https://www.facebook.com/ArmacheCafeteriaArtesanal" target="_blank" rel="noopener noreferrer" className="hover:text-brand-accent">Armache Cafetería Artesanal</a></li>
           </ul>
         </div>
       </div>
